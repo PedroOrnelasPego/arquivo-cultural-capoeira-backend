@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { uploadFiles } from '../controllers/upload.controller';
+import { uploadFiles, deleteFile } from '../controllers/upload.controller';
 
 const router = Router();
 
@@ -45,5 +45,6 @@ const uploadMiddleware = multer({
  *         description: Nenhum arquivo anexo
  */
 router.post('/', uploadMiddleware.array('arquivos'), uploadFiles);
+router.delete('/', deleteFile);
 
 export default router;

@@ -20,7 +20,7 @@ export const getVinis = async (req: Request, res: Response) => {
 export const createVinil = async (req: Request, res: Response) => {
   try {
     const { 
-      type, title, author, recordLabel, country, year, description, tracksA, tracksB, image, backImage, insertImage, quantity, recordImage, exemplarImages 
+      type, title, author, recordLabel, country, year, description, tracksA, tracksB, image, backImage, insertImage, quantity, recordImage, exemplarImages, revised 
     } = req.body;
 
     if (!title || !author) {
@@ -46,6 +46,7 @@ export const createVinil = async (req: Request, res: Response) => {
       insertImage: insertImage || null,
       recordImage: recordImage || null,
       exemplarImages: exemplarImages || [],
+      revised: revised || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -63,7 +64,7 @@ export const updateVinil = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { 
-      type, title, author, recordLabel, country, year, description, tracksA, tracksB, image, backImage, insertImage, quantity, recordImage, exemplarImages 
+      type, title, author, recordLabel, country, year, description, tracksA, tracksB, image, backImage, insertImage, quantity, recordImage, exemplarImages, revised 
     } = req.body;
 
     const container = await getContainer();
@@ -95,6 +96,7 @@ export const updateVinil = async (req: Request, res: Response) => {
       insertImage: insertImage !== undefined ? insertImage : currentItem.insertImage,
       recordImage: recordImage !== undefined ? recordImage : currentItem.recordImage,
       exemplarImages: exemplarImages !== undefined ? exemplarImages : currentItem.exemplarImages,
+      revised: revised !== undefined ? revised : (currentItem.revised || false),
       createdAt: currentItem.createdAt,
       updatedAt: new Date().toISOString(),
       // Não damos spread em tudo para não bagunçar a ordem, o Cosmos cuidará dos campos de sistema (_rid, _ts, etc)

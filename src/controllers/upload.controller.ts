@@ -66,3 +66,43 @@ export const uploadFiles = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Falha interna ao se comunicar com o Azure Blob Storage.', details: error.message });
   }
 };
+
+export const deleteFile = async (req: Request, res: Response) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'A URL do arquivo é obrigatória para exclusão.' });
+    }
+
+    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+    const containerName = 'acervomidias';
+
+    if (!connectionString) {
+      return res.status(500).json({ error: 'Falta a variável de ambiente AZURE_STORAGE_CONNECTION_STRING' });
+    }
+
+    // Extrair o nome do blob da URL
+    // Ex: https://.../acervomidias/vinil/123.jpg -> vinil/123.jpg
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/');
+    // O primeiro item é vazio, o segundo é o nome do container
+    const blobName = pathParts.slice(2).join('/');
+
+    if (!blobName) {
+       return res.status(400).json({ error: 'Não foi possível extrair o nome do blob da URL fornecida.' });
+    }
+
+    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const blockBlobClient = containerClient.getBlockBlobClient(decodeURIComponent(blobName));
+
+    await blockBlobClient.deleteIfExists();
+
+    return res.status(200).json({ message: 'Arquivo excluído com sucesso do Azure Storage.' });
+
+  } catch (error: any) {
+    console.error('Erro ao excluir arquivo do Azure:', error);
+    return res.status(500).json({ error: 'Falha ao excluir arquivo do Azure Storage.', details: error.message });
+  }
+};
