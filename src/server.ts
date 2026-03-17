@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
@@ -24,8 +25,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'Online',
-    message: 'Servidor Backend do Acervo de Capoeira está rodando.',
-    docs: `Acesse http://localhost:${PORT}/api-docs para ver o Swagger.`,
+    message: `Servidor Backend do Acervo de Capoeira está rodando. Versão: ${process.env.npm_package_version}`,
+    docs: `Acesse ${process.env.BACKEND_URL || 'http://localhost:'+PORT}/api-docs para ver o Swagger.`,
   });
 });
 

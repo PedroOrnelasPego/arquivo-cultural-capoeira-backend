@@ -49,7 +49,7 @@ export class AuthController {
 
       const { resource } = await container.items.create(newUser);
 
-      const confirmationLink = `http://localhost:3333/api/auth/verify/${verificationToken}`;
+      const confirmationLink = `${process.env.BACKEND_URL}/api/auth/verify/${verificationToken}`;
       
       const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
@@ -179,7 +179,7 @@ export class AuthController {
       await container.items.upsert(user); // Grava os dados ativados da partição
 
       // Redireciona o usuário pra interface react que capturará o param verified!
-      res.redirect('http://localhost:5173/login?verified=true');
+      res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`);
     } catch (error) {
        console.error('Erro na verificação de email:', error);
        res.status(500).send("Falha interna ao validar token do servidor.");
@@ -208,7 +208,7 @@ export class AuthController {
 
         await container.items.upsert(user); // Salva as alterações
 
-        const resetLink = `http://localhost:5173/login?reset=${resetToken}`;
+        const resetLink = `${process.env.FRONTEND_URL}/login?reset=${resetToken}`;
         
         const resetHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
