@@ -26,7 +26,7 @@ app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'Online',
     message: `Servidor Backend do Acervo de Capoeira está rodando. Versão: ${process.env.npm_package_version}`,
-    docs: `Acesse ${process.env.BACKEND_URL || 'http://localhost:'+PORT}/api-docs para ver o Swagger.`,
+    docs: `Acesse ${process.env.BACKEND_URL || 'http://localhost:'+PORT}api-docs para ver o Swagger.`,
   });
 });
 

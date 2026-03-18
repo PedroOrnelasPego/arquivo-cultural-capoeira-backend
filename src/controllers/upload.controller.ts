@@ -84,25 +84,38 @@ export const deleteFile = async (req: Request, res: Response) => {
 
     // Extrair o nome do blob da URL
     // Ex: https://.../acervomidias/vinil/123.jpg -> vinil/123.jpg
-    const urlObj = new URL(url);
-    const pathParts = urlObj.pathname.split('/');
-    // O primeiro item é vazio, o segundo é o nome do container
-    const blobName = pathParts.slice(2).join('/');
-
-    if (!blobName) {
-       return res.status(400).json({ error: 'Não foi possível extrair o nome do blob da URL fornecida.' });
+    let blobName = '';
+    try {
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/').filter(p => p.length > 0);
+      
+      // O primeiro segmento é o nome do container, o resto é o caminho do blob
+      if (pathParts.length > 1) {
+        blobName = decodeURIComponent(pathParts.slice(1).join('/'));
+      } else {
+        throw new Error('URL format is not as expected (/container/blob)');
+      }
+    } catch (urlErr: any) {
+      console.error('Erro ao processar URL para exclusão:', urlErr);
+      return res.status(400).json({ error: 'URL da mídia inválida.', details: urlErr.message });
     }
+
+    console.log(`Tentando excluir blob: "${blobName}" no container: "${containerName}"`);
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
     const containerClient = blobServiceClient.getContainerClient(containerName);
-    const blockBlobClient = containerClient.getBlockBlobClient(decodeURIComponent(blobName));
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
     await blockBlobClient.deleteIfExists();
 
     return res.status(200).json({ message: 'Arquivo excluído com sucesso do Azure Storage.' });
 
   } catch (error: any) {
-    console.error('Erro ao excluir arquivo do Azure:', error);
-    return res.status(500).json({ error: 'Falha ao excluir arquivo do Azure Storage.', details: error.message });
+    console.error('Erro fatal ao excluir arquivo do Azure:', error);
+    return res.status(500).json({ 
+      error: 'Falha ao excluir arquivo do Azure Storage.', 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
   }
 };
