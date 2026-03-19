@@ -30,17 +30,17 @@ export async function getContainer() {
 }
 
 /**
- * Retorna o container de Usuários e Permissões
+ * Retorna o container de Usuários e Permissões (Consolidado no Database Principal)
  */
 export async function getUsersContainer() {
   if (!client) {
     throw new Error("O cliente do CosmosDB não está conectado. Verifique o arquivo .env.");
   }
   if (!usersContainerInstance) {
+    // Usamos o database principal e uma tabela específica e clara: 'Curadores'
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
-    // Cria automaticamente o Database 'Users' se ele não existir
     const { container } = await database.containers.createIfNotExists({ 
-      id: 'Users',
+      id: 'Curadores',
       partitionKey: { paths: ['/id'] }
     });
     usersContainerInstance = container;

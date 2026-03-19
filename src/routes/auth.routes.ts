@@ -20,8 +20,8 @@ router.get('/verify/:token', authController.verifyEmail.bind(authController));
 // @desc    Envia e-mail com link para recuperar senha
 router.post('/forgot-password', authController.requestPasswordReset.bind(authController));
 
-// @route   POST /api/auth/reset-password
-// @desc    Valida o token e salva a nova respectiva senha
-router.post('/reset-password', authController.resetPassword.bind(authController));
+// @route   POST /api/auth/sync-microsoft
+// @desc    Sincroniza perfil Microsoft Entra no CosmosDB Database Users
+router.post('/sync-microsoft', authController.syncMicrosoftProfile.bind(authController));
 
 export default router;

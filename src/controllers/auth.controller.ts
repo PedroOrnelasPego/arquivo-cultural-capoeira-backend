@@ -286,4 +286,70 @@ export class AuthController {
       return res.status(500).json({ error: 'Erro de conexão no servidor.' });
     }
   }
+
+  /**
+   * Sincroniza o perfil vindo do Microsoft Entra ID com o CosmosDB (Database AcervoCulturalDB -> Curadores)
+   */
+  public async syncMicrosoftProfile(req: Request, res: Response) {
+    try {
+      const { email, name, microsoftId } = req.body;
+
+      if (!email || !name) {
+        return res.status(400).json({ error: 'Dados insuficientes para sincronização.' });
+      }
+
+      const container = await getUsersContainer();
+      const normalizedEmail = email.toLowerCase().trim();
+
+      // Buscamos se o usuário já existe na base
+      const querySpec = {
+        query: "SELECT * FROM c WHERE c.email = @email",
+        parameters: [{ name: "@email", value: normalizedEmail }]
+      };
+      
+      const { resources: users } = await container.items.query(querySpec).fetchAll();
+      
+      // Regra do Super Admin Único (Como solicitado: apenas este e-mail pode editar/remover)
+      const SUPER_ADMIN_EMAIL = "contato@capoeiraminasbahia.com.br";
+      let userRole = 'public';
+      
+      if (normalizedEmail === SUPER_ADMIN_EMAIL) {
+        userRole = 'admin';
+        console.log(`[AUTH] Super Admin detectado: ${normalizedEmail}`);
+      }
+
+      const userData = {
+        // Se for novo, gera um ID Numérico de 7 dígitos (Ex: 1048572)
+        id: users.length > 0 ? users[0].id : this.generateNumericId(),
+        email: normalizedEmail,
+        name: name,
+        role: users.length > 0 ? (normalizedEmail === SUPER_ADMIN_EMAIL ? 'admin' : users[0].role) : userRole,
+        microsoftId: microsoftId,
+        lastLogin: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isEmailVerified: true 
+      };
+
+      // Upsert: Cria ou Atualiza
+      const { resource } = await container.items.upsert(userData);
+
+      return res.status(200).json({
+        message: 'Perfil sincronizado com sucesso!',
+        user: resource
+      });
+
+    } catch (error: any) {
+      console.error('Erro ao sincronizar perfil Microsoft:', error);
+      return res.status(500).json({ error: 'Falha interna ao sincronizar dados no CosmosDB.', details: error.message });
+    }
+  }
+
+  /**
+   * Função para gerar ID Numérico Aleatório de exatamente 7 dígitos
+   */
+  private generateNumericId(): string {
+    const min = 1000000; // Início dos 7 dígitos
+    const max = 9999999; // Fim dos 7 dígitos
+    return Math.floor(Math.random() * (max - min + 1) + min).toString();
+  }
 }

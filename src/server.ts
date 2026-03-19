@@ -9,7 +9,8 @@ import cdRoutes from './routes/cd.routes';
 import acervoRoutes from './routes/acervo.routes';
 import uploadRoutes from './routes/upload.routes';
 import authRoutes from './routes/auth.routes';
-import { authenticateApiKey } from './middlewares/auth.middleware';
+import userRoutes from './routes/user.routes';
+import { authenticateApiKey, authorizeSuperAdmin } from './middlewares/auth.middleware';
 
 const app = express();
 const PORT = process.env.PORT || 3333;
@@ -32,6 +33,8 @@ app.get('/', (req: Request, res: Response) => {
 
 // >>> PROTEÇÃO DA API COM CHAVE DE ACESSO <<<
 app.use(authenticateApiKey);
+// >>> TRAVA DE SUPER ADMIN: Apenas Contato Minas Bahia pode editar/deletar <<<
+app.use(authorizeSuperAdmin);
 
 // Rotas da API Protegidas
 app.use('/api/acervo', acervoRoutes);
@@ -40,8 +43,9 @@ app.use('/api/livros', livroRoutes);
 app.use('/api/cds', cdRoutes);
 app.use('/api/uploads', uploadRoutes);
 
-// Rotas de Autenticação (também requerem a chave de API Client)
+// Rotas de Autenticação e Usuários (também requerem a chave de API Client)
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
