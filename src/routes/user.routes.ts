@@ -28,6 +28,7 @@ const userController = new UserController();
  *         description: Erro no Servidor
  */
 router.get('/', userController.getAllUsers.bind(userController));
+router.post('/curators', userController.upsertCurator.bind(userController));
 
 /**
  * @swagger

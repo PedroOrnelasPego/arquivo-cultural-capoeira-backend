@@ -33,18 +33,21 @@ app.get('/', (req: Request, res: Response) => {
 
 // >>> PROTEÇÃO DA API COM CHAVE DE ACESSO <<<
 app.use(authenticateApiKey);
-// >>> TRAVA DE SUPER ADMIN: Apenas Contato Minas Bahia pode editar/deletar <<<
+
+// Rotas de Autenticação (Liberadas para sincronização de qualquer usuário com Chave API)
+app.use('/api/auth', authRoutes);
+
+// >>> TRAVA DE SUPER ADMIN: Apenas Contato Minas Bahia ou Curadores podem editar/deletar <<<
 app.use(authorizeSuperAdmin);
 
-// Rotas da API Protegidas
+// Rotas da API Protegidas pelo Role-Based Access Control
 app.use('/api/acervo', acervoRoutes);
 app.use('/api/vinis', vinilRoutes);
 app.use('/api/livros', livroRoutes);
 app.use('/api/cds', cdRoutes);
 app.use('/api/uploads', uploadRoutes);
 
-// Rotas de Autenticação e Usuários (também requerem a chave de API Client)
-app.use('/api/auth', authRoutes);
+// Rotas de Usuários (Também protegidas, apenas Admin pode listar tudo e editar papéis)
 app.use('/api/users', userRoutes);
 
 app.listen(PORT, () => {

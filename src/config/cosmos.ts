@@ -40,7 +40,7 @@ export async function getUsersContainer() {
     // Usamos o database principal e uma tabela específica e clara: 'Curadores'
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
     const { container } = await database.containers.createIfNotExists({ 
-      id: 'Curadores',
+      id: 'Usuarios',
       partitionKey: { paths: ['/id'] }
     });
     usersContainerInstance = container;

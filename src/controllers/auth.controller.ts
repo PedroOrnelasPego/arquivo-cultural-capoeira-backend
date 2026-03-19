@@ -294,7 +294,10 @@ export class AuthController {
     try {
       const { email, name, microsoftId } = req.body;
 
+      console.log(`[AUTH] Recebendo sync para: ${email} (${name})`);
+
       if (!email || !name) {
+        console.warn('[AUTH] Dados insuficientes em syncMicrosoftProfile:', req.body);
         return res.status(400).json({ error: 'Dados insuficientes para sincronização.' });
       }
 
@@ -318,17 +321,23 @@ export class AuthController {
         console.log(`[AUTH] Super Admin detectado: ${normalizedEmail}`);
       }
 
+      // Se o usuário já existia (ex: foi pré-cadastrado no painel adm), usamos o ID dele
+      const existingUser = users.length > 0 ? users[0] : null;
+
       const userData = {
-        // Se for novo, gera um ID Numérico de 7 dígitos (Ex: 1048572)
-        id: users.length > 0 ? users[0].id : this.generateNumericId(),
+        id: existingUser ? existingUser.id : this.generateNumericId(),
         email: normalizedEmail,
         name: name,
-        role: users.length > 0 ? (normalizedEmail === SUPER_ADMIN_EMAIL ? 'admin' : users[0].role) : userRole,
+        // Se já existia, mantém a role antiga e o status de curador
+        role: existingUser ? (normalizedEmail === SUPER_ADMIN_EMAIL ? 'admin' : existingUser.role) : userRole,
+        isCurator: existingUser ? (normalizedEmail === SUPER_ADMIN_EMAIL ? true : existingUser.isCurator) : (normalizedEmail === SUPER_ADMIN_EMAIL),
         microsoftId: microsoftId,
         lastLogin: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isEmailVerified: true 
       };
+
+      console.log(`[AUTH] Persistindo usuário: ${userData.email} com role: ${userData.role} (Curador: ${userData.isCurator})`);
 
       // Upsert: Cria ou Atualiza
       const { resource } = await container.items.upsert(userData);
