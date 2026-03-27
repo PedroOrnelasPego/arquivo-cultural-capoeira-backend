@@ -1,6 +1,6 @@
 {
   "name": "arquivo-cultural-capoeira-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "API em Node.js para o Acervo Cultural de Capoeira",
   "main": "src/server.ts",
   "scripts": {
