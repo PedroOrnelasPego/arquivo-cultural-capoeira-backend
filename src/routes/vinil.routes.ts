@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getVinis, createVinil, updateVinil } from '../controllers/vinil.controller';
+import { getVinis, getVinisNomes, createVinil, updateVinil } from '../controllers/vinil.controller';
 
 const router = Router();
 
@@ -23,6 +23,20 @@ const router = Router();
  *         description: Erro no Servidor
  */
 router.get('/', getVinis);
+
+/**
+ * @swagger
+ * /api/vinis/nomes:
+ *   get:
+ *     summary: Retorna a lista simplificada com apenas Nome e Autor dos Vinis
+ *     tags: [Vinis]
+ *     responses:
+ *       200:
+ *         description: Lista projetada apenas com (id, title, author) melhorando o payload.
+ *       500:
+ *         description: Erro no Servidor
+ */
+router.get('/nomes', getVinisNomes);
 
 /**
  * @swagger

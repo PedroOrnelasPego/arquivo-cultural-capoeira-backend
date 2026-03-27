@@ -8,9 +8,6 @@ import livroRoutes from './routes/livro.routes';
 import cdRoutes from './routes/cd.routes';
 import acervoRoutes from './routes/acervo.routes';
 import uploadRoutes from './routes/upload.routes';
-import authRoutes from './routes/auth.routes';
-import userRoutes from './routes/user.routes';
-import { authenticateApiKey, authorizeSuperAdmin } from './middlewares/auth.middleware';
 
 const app = express();
 const PORT = process.env.PORT || 3333;
@@ -31,14 +28,7 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-// >>> PROTEÇÃO DA API COM CHAVE DE ACESSO <<<
-app.use(authenticateApiKey);
-
-// Rotas de Autenticação (Liberadas para sincronização de qualquer usuário com Chave API)
-app.use('/api/auth', authRoutes);
-
-// >>> TRAVA DE SUPER ADMIN: Apenas Contato Minas Bahia ou Curadores podem editar/deletar <<<
-app.use(authorizeSuperAdmin);
+// A API do Acervo agora delega a segurança/usuários para a aplicação consumidora (Minas Bahia)
 
 // Rotas da API Protegidas pelo Role-Based Access Control
 app.use('/api/acervo', acervoRoutes);
@@ -47,8 +37,7 @@ app.use('/api/livros', livroRoutes);
 app.use('/api/cds', cdRoutes);
 app.use('/api/uploads', uploadRoutes);
 
-// Rotas de Usuários (Também protegidas, apenas Admin pode listar tudo e editar papéis)
-app.use('/api/users', userRoutes);
+// Fim rotas Acervo
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);

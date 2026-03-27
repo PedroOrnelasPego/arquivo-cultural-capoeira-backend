@@ -7,7 +7,7 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Acervo
- *   description: Visão Geral de Todos os Itens do Acervo Histórico
+ *   description: Visão Geral de Todos os Itens do Acervo
  */
 
 /**

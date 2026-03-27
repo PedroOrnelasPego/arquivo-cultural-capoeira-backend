@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getContainer } from '../config/cosmos';
+import { v4 as uuidv4 } from 'uuid';
 
 export const getVinis = async (req: Request, res: Response) => {
   try {
@@ -17,6 +18,20 @@ export const getVinis = async (req: Request, res: Response) => {
   }
 };
 
+export const getVinisNomes = async (req: Request, res: Response) => {
+  try {
+    const container = await getContainer();
+    const { resources } = await container.items
+      .query('SELECT c.id, c.title, c.author FROM c WHERE c.type = "vinil" ORDER BY c.title ASC')
+      .fetchAll();
+
+    return res.status(200).json(resources);
+  } catch (error: any) {
+    console.error('Erro ao buscar nomes dos vinis:', error);
+    return res.status(500).json({ error: 'Erro interno ao buscar a lista simplificada dos vinis.' });
+  }
+};
+
 export const createVinil = async (req: Request, res: Response) => {
   try {
     const { 
@@ -31,6 +46,7 @@ export const createVinil = async (req: Request, res: Response) => {
     
     // Modelagem básica do Vinil baseada no Frontend
     const newVinil = {
+      id: uuidv4(),
       type: type || "vinil",
       quantity: quantity !== undefined ? Number(quantity) : 1,
       title,
